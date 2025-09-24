@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+  servicea:
+    build:
+      context: ./ServiceA
+      dockerfile: Dockerfile
+    ports:
+      - "7092:80"
+    depends_on:
+      - redis
+      - postgres
+      - mongo
+
+  serviceb:
+    build:
+      context: ./ServiceB
+      dockerfile: Dockerfile
+    ports:
+      - "7127:80"
+    depends_on:
+      - redis
+      - postgres
+
+  monitoringservice:
+    build:
+      context: ./MonitoringService
+      dockerfile: Dockerfile
+    ports:
+      - "7039:80"
+    depends_on:
+      - sqlserver
+      - servicea
+      - serviceb
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: postgres
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "YourStrong@Passw0rd"
+      ACCEPT_EULA: "Y"
